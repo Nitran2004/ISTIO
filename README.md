@@ -141,6 +141,3 @@ El sistema ha sido probado con éxito, mostrando:
 - David Teran
 - Mateo Cartagena
 
-## 📄 Documentación
-
-Para más detalles sobre la implementación, políticas de seguridad, configuración de resiliencia y análisis de resultados, consulte el informe completo en la carpeta `docs/`.
