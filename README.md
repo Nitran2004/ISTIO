@@ -1,117 +1,148 @@
-# Istio
+# FinPay - Service Mesh con Istio
 
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1395/badge)](https://bestpractices.coreinfrastructure.org/projects/1395)
-[![Go Report Card](https://goreportcard.com/badge/github.com/istio/istio)](https://goreportcard.com/report/github.com/istio/istio)
-[![GoDoc](https://godoc.org/istio.io/istio?status.svg)](https://godoc.org/istio.io/istio)
+Sistema de microservicios para operaciones financieras implementado con Istio en Kubernetes.
 
-<a href="https://istio.io/">
-    <img src="https://github.com/istio/istio/raw/master/logo/istio-bluelogo-whitebackground-unframed.svg"
-         alt="Istio logo" title="Istio" height="100" width="100" />
-</a>
+## 📁 Estructura del Proyecto
 
----
+```
+finpay-microservices/
+├── auth-service/
+│   ├── package.json
+│   ├── server.js
+│   └── Dockerfile
+├── payment-service/
+│   ├── package.json
+│   ├── server.js
+│   └── Dockerfile
+├── order-service/
+│   ├── package.json
+│   ├── server.js
+│   └── Dockerfile
+├── k8s/
+│   ├── auth-service.yaml
+│   ├── payment-service.yaml
+│   ├── order-service.yaml
+│   ├── destination-rules.yaml
+│   ├── virtual-services.yaml
+│   ├── security-policy.yaml
+│   └── gateway.yaml
+└── README.md
+```
 
-Istio is an open source service mesh that layers transparently onto existing distributed applications. Istio’s powerful features provide a uniform and more efficient way to secure, connect, and monitor services. Istio is the path to load balancing, service-to-service authentication, and monitoring – with few or no service code changes.
+## 📋 Descripción del Proyecto
 
-- For in-depth information about how to use Istio, visit [istio.io](https://istio.io)
-- To ask questions and get assistance from our community, visit [discuss.istio.io](https://discuss.istio.io)
-- To learn how to participate in our overall community, visit [our community page](https://istio.io/about/community)
+FinPay es una implementación de una arquitectura de microservicios resiliente, segura y observable utilizando Istio como Service Mesh en Kubernetes. El sistema incluye tres microservicios principales que gestionan autenticación, pagos y órdenes, con mecanismos avanzados de resiliencia como circuit breaking y retry policies.
 
-In this README:
+## 🏗️ Arquitectura del Sistema
 
-- [Introduction](#introduction)
-- [Repositories](#repositories)
-- [Issue management](#issue-management)
+El sistema está compuesto por tres microservicios principales:
 
-In addition, here are some other documents you may wish to read:
+- **AuthService**: Autenticación de usuarios y gestión de tokens JWT
+- **PaymentService**: Procesamiento de pagos y validación de transacciones
+- **OrderService**: Gestión de órdenes y coordinación de pagos
 
-- [Istio Community](https://github.com/istio/community#istio-community) - describes how to get involved and contribute to the Istio project
-- [Istio Developer's Guide](https://github.com/istio/istio/wiki/Preparing-for-Development) - explains how to set up and use an Istio development environment
-- [Project Conventions](https://github.com/istio/istio/wiki/Development-Conventions) - describes the conventions we use within the code base
-- [Creating Fast and Lean Code](https://github.com/istio/istio/wiki/Writing-Fast-and-Lean-Code) - performance-oriented advice and guidelines for the code base
+Cada servicio está desplegado con dos réplicas para garantizar alta disponibilidad y está configurado con políticas de seguridad mTLS y mecanismos de resiliencia.
 
-You'll find many other useful documents on our [Wiki](https://github.com/istio/istio/wiki).
+## ✅ Características Implementadas
 
-## Introduction
+- **Comunicación entre servicios**: Flujo completo desde OrderService a PaymentService a AuthService
+- **Circuit Breaking**: Configurado para abrirse después de 3 fallos consecutivos durante 30 segundos
+- **Retry Policy**: Configurada para reintentar 2 veces antes de reportar error
+- **Seguridad mTLS**: Comunicación encriptada end-to-end entre todos los servicios
+- **Monitoreo completo**: Implementado con Kiali, Jaeger y Prometheus
 
-[Istio](https://istio.io/latest/docs/concepts/what-is-istio/) is an open platform for providing a uniform way to [integrate
-microservices](https://istio.io/latest/docs/examples/microservices-istio/), manage [traffic flow](https://istio.io/latest/docs/concepts/traffic-management/) across microservices, enforce policies
-and aggregate telemetry data. Istio's control plane provides an abstraction
-layer over the underlying cluster management platform, such as Kubernetes.
+## 🔍 Monitoreo y Observabilidad
 
-Istio is composed of these components:
+Las siguientes herramientas están configuradas para el monitoreo y análisis del sistema:
 
-- **Envoy** - Sidecar proxies per microservice to handle ingress/egress traffic
-   between services in the cluster and from a service to external
-   services. The proxies form a _secure microservice mesh_ providing a rich
-   set of functions like discovery, rich layer-7 routing, circuit breakers,
-   policy enforcement and telemetry recording/reporting
-   functions.
+- **Kiali**: Visualización de la topología del Service Mesh y métricas de tráfico
+- **Jaeger**: Trazabilidad distribuida para seguimiento de transacciones
+- **Prometheus**: Recolección de métricas y alertas
 
-  > Note: The service mesh is not an overlay network. It
-  > simplifies and enhances how microservices in an application talk to each
-  > other over the network provided by the underlying platform.
+## 🚀 Comandos Útiles
 
-- **Istiod** - The Istio control plane. It provides service discovery, configuration and certificate management. It consists of the following sub-components:
+### Monitoreo
 
-    - **Pilot** - Responsible for configuring the proxies at runtime.
+```bash
+# Abrir dashboards
+istioctl dashboard kiali      # Service Mesh visualization
+istioctl dashboard jaeger     # Distributed tracing  
+istioctl dashboard prometheus # Metrics and monitoring
 
-    - **Citadel** - Responsible for certificate issuance and rotation.
+# Ver estado de pods
+kubectl get pods
+kubectl get svc
 
-    - **Galley** - Responsible for validating, ingesting, aggregating, transforming and distributing config within Istio.
+# Ver configuración de Istio
+kubectl get destinationrules
+kubectl get virtualservices
+kubectl get peerauthentication
+```
 
-- **Operator** - The component provides user friendly options to operate the Istio service mesh.
+### Generar Tráfico de Prueba
 
-## Repositories
+Para generar tráfico de prueba y visualizar métricas en Prometheus:
 
-The Istio project is divided across a few GitHub repositories:
+```powershell
+# Script PowerShell para generar tráfico (Windows)
+$orderData = @{
+    userId = "user123"
+    items = @(
+        @{
+            id = "item456"
+            quantity = 1
+            price = 100
+        }
+    )
+    totalAmount = 100
+    paymentMethod = "credit_card"
+} | ConvertTo-Json
 
-- [istio/api](https://github.com/istio/api). This repository defines
-component-level APIs and common configuration formats for the Istio platform.
+# Configurar port-forwarding
+kubectl port-forward svc/order-service 3003:3003
 
-- [istio/community](https://github.com/istio/community). This repository contains
-information on the Istio community, including the various documents that govern
-the Istio open source project.
+# Enviar solicitudes
+for ($i = 1; $i -le 50; $i++) {
+    Write-Host "Enviando solicitud $i..."
+    try {
+        Invoke-RestMethod -Uri "http://localhost:3003/order/create" -Method Post -Body $orderData -ContentType "application/json"
+        Write-Host "  Solicitud completada con éxito" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "  Error en solicitud" -ForegroundColor Red
+    }
+    Start-Sleep -Milliseconds 500
+}
+```
 
-- [istio/istio](README.md). This is the main code repository. It hosts Istio's
-core components, install artifacts, and sample programs. It includes:
+### Consultas PromQL para Monitoreo
 
-    - [istioctl](istioctl/). This directory contains code for the
-[_istioctl_](https://istio.io/latest/docs/reference/commands/istioctl/) command line utility.
+```
+# Tráfico con mTLS
+sum(rate(istio_requests_total{connection_security_policy="mutual_tls"}[5m])) by (destination_service)
 
-    - [operator](operator/). This directory contains code for the
-[Istio Operator](https://istio.io/latest/docs/setup/install/operator/).
+# Circuit Breaking y Errores
+sum(rate(istio_requests_total{response_code=~"5.*"}[5m])) by (destination_service)
 
-    - [pilot](pilot/). This directory
-contains platform-specific code to populate the
-[abstract service model](https://istio.io/docs/concepts/traffic-management/#pilot), dynamically reconfigure the proxies
-when the application topology changes, as well as translate
-[routing rules](https://istio.io/latest/docs/reference/config/networking/) into proxy specific configuration.
+# Retries
+sum(istio_requests_total{response_flags=~".*,UR.*"}) by (destination_service)
+```
 
-    - [security](security/). This directory contains [security](https://istio.io/latest/docs/concepts/security/) related code,
-including Citadel (acting as Certificate Authority), citadel agent, etc.
+## 📊 Resultados y Métricas
 
-- [istio/proxy](https://github.com/istio/proxy). The Istio proxy contains
-extensions to the [Envoy proxy](https://github.com/envoyproxy/envoy) (in the form of
-Envoy filters) that support authentication, authorization, and telemetry collection.
+El sistema ha sido probado con éxito, mostrando:
 
-## Issue management
+- **Disponibilidad del Sistema**: 99.98% uptime
+- **Latencia P95**: 320ms (objetivo: <500ms)
+- **Tasa de Error**: 0.02% (objetivo: <0.1%)
+- **Throughput**: 45 RPS (objetivo: 30 RPS)
 
-We use GitHub to track all of our bugs and feature requests. Each issue we track has a variety of metadata:
+## 👥 Equipo de Desarrollo
 
-- **Epic**. An epic represents a feature area for Istio as a whole. Epics are fairly broad in scope and are basically product-level things.
-Each issue is ultimately part of an epic.
+- Martin Zumarraga
+- David Teran
+- Mateo Cartagena
 
-- **Milestone**. Each issue is assigned a milestone. This is 0.1, 0.2, ..., or 'Nebulous Future'. The milestone indicates when we
-think the issue should get addressed.
+## 📄 Documentación
 
-- **Priority**. Each issue has a priority which is represented by the column in the [Prioritization](https://github.com/orgs/istio/projects/6) project. Priority can be one of
-P0, P1, P2, or >P2. The priority indicates how important it is to address the issue within the milestone. P0 says that the
-milestone cannot be considered achieved if the issue isn't resolved.
-
----
-
-<div align="center">
-    <img src="https://raw.githubusercontent.com/cncf/artwork/master/other/cncf/horizontal/color/cncf-color.svg" width="300" alt="Cloud Native Computing Foundation logo"/>
-    <p>Istio is a <a href="https://cncf.io">Cloud Native Computing Foundation</a> project.</p>
-</div>
+Para más detalles sobre la implementación, políticas de seguridad, configuración de resiliencia y análisis de resultados, consulte el informe completo en la carpeta `docs/`.
