@@ -1,0 +1,31 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: payment-service-vs
+spec:
+  hosts:
+  - payment-service
+  http:
+  - route:
+    - destination:
+        host: payment-service
+    retries:
+      attempts: 2
+      perTryTimeout: 5s
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: auth-service-vs
+spec:
+  hosts:
+  - auth-service
+  http:
+  - route:
+    - destination:
+        host: auth-service
+    retries:
+      attempts: 2
+      perTryTimeout: 5s
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream
