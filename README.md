@@ -124,8 +124,6 @@ sum(rate(istio_requests_total{connection_security_policy="mutual_tls"}[5m])) by 
 # Circuit Breaking y Errores
 sum(rate(istio_requests_total{response_code=~"5.*"}[5m])) by (destination_service)
 
-# Retries
-sum(istio_requests_total{response_flags=~".*,UR.*"}) by (destination_service)
 ```
 
 ## 📊 Resultados y Métricas
